@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: dojo
+    ports: 
+      - '5432:5432'
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - 'db:/var/lib/postgresql/data'
+  users:
+    build:
+      context: ./users
+    volumes:
+      - ./users/src:/usr/app
+    ports:
+      - "3001:3001"
+volumes:
+  db:
+networks:
+  default:
+    name: dojo-network
