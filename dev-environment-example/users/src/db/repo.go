@@ -6,19 +6,20 @@ import (
 )
 
 type User struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id        int64  `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 var (
 	ErrDuplicateUser = errors.New("cannot create a dublicate user")
 )
 
-func doesUserExist(connection *Connection, name string) (bool, error) {
-	q := `SELECT id FROM users WHERE name = $1;`
+func doesUserExist(connection *Connection, first_name string, last_nmae string) (bool, error) {
+	q := `SELECT id FROM users WHERE first_name = $1 and last_name = $2;`
 
 	var id int64
-	err := connection.db.QueryRow(q, name).Scan(&id)
+	err := connection.db.QueryRow(q, first_name, last_nmae).Scan(&id)
 
 	if err == sql.ErrNoRows {
 		return false, nil
@@ -34,7 +35,7 @@ func GetUsers() (*[]User, error) {
 		return nil, err
 	}
 
-	q := `SELECT id, name FROM users;`
+	q := `SELECT id, first_name, last_name FROM users;`
 	rows, err := connection.db.Query(q)
 
 	if err != nil {
@@ -47,13 +48,14 @@ func GetUsers() (*[]User, error) {
 
 	for rows.Next() {
 		var (
-			id   int64
-			name string
+			id         int64
+			first_name string
+			last_name  string
 		)
-		if err := rows.Scan(&id, &name); err != nil {
+		if err := rows.Scan(&id, &first_name, &last_name); err != nil {
 			return nil, err
 		}
-		users = append(users, User{Id: id, Name: name})
+		users = append(users, User{Id: id, FirstName: first_name, LastName: last_name})
 	}
 
 	return &users, nil
@@ -66,27 +68,28 @@ func GetUser(userId int64) (*User, error) {
 		return nil, err
 	}
 
-	q := `SELECT id, name FROM users WHERE id = $1;`
+	q := `SELECT id, first_name, last_name FROM users WHERE id = $1;`
 	row := connection.db.QueryRow(q, userId)
 
 	var (
-		id   int64
-		name string
+		id         int64
+		first_name string
+		last_name  string
 	)
 
-	err2 := row.Scan(&id, &name)
+	err2 := row.Scan(&id, &first_name, &last_name)
 
-	return &User{Id: id, Name: name}, err2
+	return &User{Id: id, FirstName: first_name, LastName: last_name}, err2
 }
 
-func AddUser(name string) (int64, error) {
+func AddUser(first_name string, last_name string) (int64, error) {
 	connection, err := GetConnection()
 
 	if err != nil {
 		return -1, err
 	}
 
-	exists, err := doesUserExist(connection, name)
+	exists, err := doesUserExist(connection, first_name, last_name)
 
 	if err != nil {
 		return -1, err
@@ -96,10 +99,10 @@ func AddUser(name string) (int64, error) {
 		return -1, ErrDuplicateUser
 	}
 
-	q := `INSERT INTO users (name) VALUES ($1) RETURNING id;`
+	q := `INSERT INTO users (first_name, last_name) VALUES ($1, $2) RETURNING id;`
 
 	var id int64
-	err2 := connection.db.QueryRow(q, name).Scan(&id)
+	err2 := connection.db.QueryRow(q, first_name, last_name).Scan(&id)
 
 	return id, err2
 }

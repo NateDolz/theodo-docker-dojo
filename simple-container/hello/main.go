@@ -35,7 +35,7 @@ func helloName(ctx *gin.Context) {
 	ctx.IndentedJSON(
 		http.StatusOK,
 		genericResponse{
-			Message: fmt.Sprintf("Hello %s!", name),
+			Message: fmt.Sprintf("Hello %s! Hope you have a great day!", name),
 		},
 	)
 }

@@ -19,6 +19,24 @@ services:
       - ./users/src:/usr/app
     ports:
       - "3001:3001"
+  todos:
+    build:
+      context: ./todos
+    volumes:
+      - ./todos:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3002:3002"
+    command: npm run start
+  client:
+    build:
+      context: ./client
+    volumes:
+      - ./client:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    command: npm run start
 volumes:
   db:
 networks:

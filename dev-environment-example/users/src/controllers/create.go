@@ -8,7 +8,8 @@ import (
 )
 
 type createRequest struct {
-	Name string `json:"name"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 func Create(c *gin.Context) {
@@ -16,15 +17,21 @@ func Create(c *gin.Context) {
 
 	c.BindJSON(&body)
 
-	if body.Name == "" {
-		c.IndentedJSON(http.StatusBadRequest, "Body must contain the name of the user to create")
+	if body.FirstName == "" {
+		c.JSON(http.StatusBadRequest, "Body must contain the name of the user to create")
+		return
 	}
 
-	user, err := database.AddUser(body.Name)
+	if body.LastName == "" {
+		c.JSON(http.StatusBadRequest, "Body must contain the name of the user to create")
+		return
+	}
+
+	user, err := database.AddUser(body.FirstName, body.LastName)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, err)
 	} else {
-		c.IndentedJSON(http.StatusOK, user)
+		c.JSON(http.StatusOK, user)
 	}
 }

@@ -22,6 +22,8 @@ type Connection struct {
 	Config DbConfig
 }
 
+var connection Connection
+
 func getConfig() DbConfig {
 	user := os.Getenv("DB_USER")
 	pwd := os.Getenv("DB_PWD")
@@ -41,6 +43,10 @@ func getConfig() DbConfig {
 }
 
 func GetConnection() (*Connection, error) {
+	if (Connection{}) != connection {
+		return &connection, nil
+	}
+
 	config := getConfig()
 
 	connStr := fmt.Sprintf(
@@ -58,10 +64,10 @@ func GetConnection() (*Connection, error) {
 		return nil, err
 	}
 
-	connection := &Connection{
+	connection := Connection{
 		db:     db,
 		Config: config,
 	}
 
-	return connection, nil
+	return &connection, nil
 }
