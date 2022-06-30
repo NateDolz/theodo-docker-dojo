@@ -1,11 +1,22 @@
+# start with the node managed image available on docker hub
 FROM node
 
+# Set the working directory inside of the container
 WORKDIR /usr/src/app
 
+# Copy over all of our package dependency information
 COPY package*.json ./
 
+# Install all necessary depencies
 RUN npm install
 
+# Open the containers 3000 port to accept connections
+# Since containers are completely isolated environments
+# This is the only way to ensure that we can access our client
 EXPOSE 3000
 
+# Copy over the application source code to be used at runtime
 COPY . .
+
+# No command is specified in case there is a difference in the way
+# we want to run our application (nodemon, ts-node) etc...

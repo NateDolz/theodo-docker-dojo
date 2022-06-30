@@ -1,44 +1,107 @@
+# The docker-compose schema version
 version: '3.3'
+# All of our service definitions go under services
 services:
+  # Our database container
   db:
+    # pull from the latest postgres image on dockerhub
     image: postgres
-    restart: always
+    # restart the container on application failure
+    restart: always    
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: dojo
+    # forward the 5432 port in the container to localhost
     ports: 
       - '5432:5432'
+    # mount two volumes 
+    # the first is a mounting the local ./sql folder into 
+    # the database containers entrypoint folder allowing us to 
+    # execute scripts on container startup.
+    # The second volume is a volume managed by docker that allows
+    # us to persist all of our database data.
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
       - 'db:/var/lib/postgresql/data'
+  # The users service (go). Handles all interactions with users
+  # Also contains a rest API for CRUD operations
   users:
+    # The service does not come directly from an image.
+    # This section therefore contains build instructions
     build:
+      # the context field tells docker to look for the dockerfile in the 
+      # ./users folder
       context: ./users
+    # here we have one volume that mounts all of our source into the container
+    # this can be used in development to enable things like hotloading
+    # in development environments that support it
     volumes:
       - ./users/src:/usr/app
+    # forward the 3001 port inside the container to the 3001 port in the
+    # local environment
     ports:
       - "3001:3001"
+  # The todos service (ts). Handles all interactions with Todos
+  # Also contains a rest API for CRUD operations
   todos:
+    # The service does not come directly from an image.
+    # This section therefore contains build instructions
     build:
+      # the context field tells docker to look for the dockerfile in the 
+      # ./todos folder
       context: ./todos
+    # This section contains two volumes
+    # In the first we mount our application code into the container
+    # to enable hot reloading
+    # In the second we are unmounting the local node_modules folder to 
+    # ensure the container uses its own dependcies 
     volumes:
       - ./todos:/usr/src/app
       - /usr/src/app/node_modules
+    # forward the 3002 port inside the container to the 3002 port in the
+    # local environment
     ports:
       - "3002:3002"
+    # The dockerfile provided does not contain a command to run 
+    # when the container is started so we provide one here.
     command: npm run start
+  # The client. A CRA used to interact with our application
   client:
+    # The service does not come directly from an image.
+    # This section therefore contains build instructions
     build:
+      # the context field tells docker to look for the dockerfile in the 
+      # ./client folder
       context: ./client
+    # This section contains two volumes
+    # In the first we mount our application code into the container
+    # to enable hot reloading
+    # In the second we are unmounting the local node_modules folder to 
+    # ensure the container uses its own dependcies 
     volumes:
       - ./client:/usr/src/app
       - /usr/src/app/node_modules
+    # forward the 3000 port inside the container to the 3000 port in the
+    # local environment
     ports:
       - "3000:3000"
+    # The dockerfile provided does not contain a command to run 
+    # when the container is started so we provide one here.
     command: npm run start
+# docker managed volume definitions 
+# An independant file system that exists outside of the container
+# managed by docker itself
+# The only volume we have defined is the db volume for persisting our
+# database data
 volumes:
   db:
+# networks by default docker compose creates a network
+# for containers in the compose file to talk to each other with
+# a hostname equal to the service name
+# If there is a need to link your services over network to 
+# an application not managed by this compose instance they
+# can communicate over this network.
 networks:
   default:
     name: dojo-network

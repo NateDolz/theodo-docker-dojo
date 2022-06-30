@@ -1,21 +1,38 @@
+# Start with the go lang managed image on docker hub
 FROM golang:1.18-alpine
 
+# Set some necessary environment variables for the go compiler
 ENV GO111MODULE=on \
   CGO_ENABLED=0 \
   GOOS=linux \
   GOARCH=amd64
 
+# Set the working directory inside of the container environment
 WORKDIR /app
 
+# Copy from the equivalent of (package.json and yarn.lock)
+# local over from the local machine
 COPY go.mod ./
 COPY go.sum ./
 
+# Install all necessary depencies 
+# equivalent of yarn install / npm install
 RUN go mod download
 
+# Copy over the rest of the application source code
+# To be used by the compiler or the runtime
 COPY . .
 
+# Compile the application found at ./hello 
+# into the ./app directory
 RUN go build -o ./app ./hello
 
+# Open the containers 8080 port to accept connections
+# Since containers are completely isolated environments
+# This is the only way to ensure that we can access our http server
 EXPOSE 8080
 
+# This is the command to run when the container is started
+# In go we are just starting our compiled binary
+# In a node application this would be something like CMD ["yarn", "start"]
 CMD [ "./app" ]
