@@ -29,7 +29,14 @@ const get = async (id: string) =>
 
 const create = async (todo: Todo) => dbClient<Todo>('todos').insert(todo)
 
-const update = async (todo: Todo) => dbClient<Todo>('todos').update(todo)
+const update = async (todo: Todo) =>
+  dbClient<Todo>('todos')
+    .update({
+      details: todo.details,
+      assigned_to: todo.assigned_to,
+      completed: todo.completed,
+    })
+    .where({ id: todo.id })
 
 const remove = async (id: string) =>
   dbClient<Todo>('todos').delete().where('id', '=', id)

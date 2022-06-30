@@ -31,25 +31,48 @@ function Home() {
     fetchTodos()
   }, [])
   
-  const event = (obj: any) => {
-    console.info(obj)
-  } 
+  const onUpdateTodo = useCallback(async(todo: Todo) => {
+    await todosClient.put(`/todos/${todo.id}`, todo)
+    await fetchTodos()
+  }, [fetchTodos])
+
+  const onDeleteTodo = useCallback(async(todo: Todo) => {
+    await todosClient.delete(`/todos/${todo.id}`)
+    await fetchTodos()
+  }, [fetchTodos])
+
+  const onAddTodo = useCallback(async(todo: Todo) => {
+    await todosClient.post(`/todos`, todo)
+    await fetchTodos()
+  }, [fetchTodos])
+
+  const onAddUser = useCallback(async(user:User) => {
+    await usersClient.post('/users', user)
+    await fetchUsers()
+  }, [fetchUsers])
+
+  const onAssignUser = useCallback(async (user:User, todo:Todo) => {
+    await todosClient.patch(`/todos/${todo.id}/assign/${user.id}`)
+    await fetchTodos()
+  }, [fetchTodos])
 
   return (
     <>
-    <Typography>
+    <Typography sx={{marginTop: '20px'}}>
       THEODO DOJO
     </Typography>
-    <Box sx={{display: 'flex', flexDirection: 'row'}}>
+    <Box sx={{display: 'flex', flexDirection: 'row', width: '100%', alignItems: 'top', justifyContent: 'center'}}>
       <TodoList 
         list={todosList}
-        onAddTodo={event} 
-        onDeleteTodo={event}
-        onUpdateTodo={event}
+        users={usersList}
+        onAssignUser={onAssignUser}
+        onAddTodo={onAddTodo} 
+        onDeleteTodo={onDeleteTodo}
+        onUpdateTodo={onUpdateTodo}
       />
       <UserList
         list={usersList}
-        onAddUser={event}
+        onAddUser={onAddUser}
       />
     </Box>
     </>

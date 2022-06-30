@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"theodo-docker-dojo/user-service/controllers"
@@ -19,10 +18,8 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Methods", "*")
 
 		if c.Request.Method != "OPTIONS" {
-			fmt.Println("Regular Request")
 			c.Next()
 		} else {
-			fmt.Println("OPTIONS")
 			c.AbortWithStatus(http.StatusOK)
 		}
 
