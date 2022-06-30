@@ -7,6 +7,10 @@
 Command builds the local docker file relative to `.` and tags it with the docker hub repository and image name and version
 `docker build --tag natedolz/theodo-dojo:hello-latest .`
 
+### Push the image
+
+`docker push natedolz/theodo-dojo:hello-beta`
+
 ### Run the image 
 
 Command runs an image the `-i` and `-t` flag work together to keep the image open in the terminal reading and writing output.
